@@ -3,8 +3,12 @@ name = "stream-merge"
 version = "0.1.0"
 authors = ["Bobby McShane <mcshane.bobby@gmail.com>"]
 edition = "2018"
+license = "MIT"
+keywords = ["pcap", "s3", "async", "tokio", "zstd", "gzip"]
+description = "Merge together and efficiently time-sequence compressed .pcap files stored in AWS S3 object storage (or locally) to stdout for pipelined processing High performance and parallel implementation for > 10 Gbps playback throughput with large numbers of files (~4k)."
+readme = "README.md"
+repository = "https://github.com/robber-m/stream-merge.git"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 # TODO: feature gate behind gzip, zstd, etc..
