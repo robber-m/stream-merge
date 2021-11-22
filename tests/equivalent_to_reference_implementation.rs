@@ -28,7 +28,7 @@ fn compare_to_mergecap() -> Result<(), Box<dyn std::error::Error>> {
                 "4D 3C B2 A1 02 00 04 00 00 00 00 00 00 00 00 00
     00 00 04 00 01 00 00 00"
             );
-            file.write_all(&PCAP_HDR_NSEC).unwrap();
+            file.write_all(PCAP_HDR_NSEC).unwrap();
             // TODO: use the property testing framework to decide between nanosecond or microsecond/millisecond? resolution inputs
             // TODO: somehow use the property testing framework for choosing the size/contents of the packet
             for ts in 0..10 * i {

@@ -5,7 +5,7 @@ authors = ["Bobby McShane <mcshane.bobby@gmail.com>"]
 edition = "2018"
 license = "MIT"
 keywords = ["pcap", "s3", "async", "zstd", "gzip"]
-description = "Merge together and efficiently time-sequence compressed .pcap files stored in AWS S3 object storage (or locally) to stdout for pipelined processing High performance and parallel implementation for > 10 Gbps playback throughput with large numbers of files (~4k)."
+description = "Merge together and efficiently time-sequence compressed .pcap files stored in AWS S3 object storage (or locally) to stdout for pipelined processing. High performance and parallel implementation for > 10 Gbps playback throughput with large numbers of files (~4k)."
 readme = "README.md"
 repository = "https://github.com/robber-m/stream-merge.git"
 
@@ -48,7 +48,7 @@ criterion = "0.3"
 itertools = "0.9.0"
 
 [[bench]]
-name = "tournament_tree"
+name = "benchmark"
 harness = false
 
 [profile.release]

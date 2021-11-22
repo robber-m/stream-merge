@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use itertools::Itertools;
-use merge_pcaps;
+use stream_merge;
 
 pub struct InputStream<T: Iterator<Item = u64>> {
     iterator: std::iter::Peekable<T>,
@@ -15,7 +15,7 @@ impl<T: Iterator<Item = u64>> InputStream<T> {
     }
 } // TODO: rather than taking an "InputStream", just take an iterator which returns tuples of
   // (Value,Data) as input to tournament_tree::Tree::new?
-impl<T: Iterator<Item = u64>> merge_pcaps::tournament_tree::Mergeable for InputStream<T> {
+impl<T: Iterator<Item = u64>> stream_merge::tournament_tree::Mergeable for InputStream<T> {
     type Data = <T>::Item;
 
     // returns an tuple of (timestamp,data) or None
@@ -50,7 +50,7 @@ pub fn identical_inputs(c: &mut Criterion) {
                 for _ in 0..*n_streams {
                     inputs.push(InputStream::new((0..std::u64::MAX).into_iter()));
                 }
-                let mut tree = merge_pcaps::tournament_tree::Tree::new(inputs);
+                let mut tree = stream_merge::tournament_tree::Tree::new(inputs);
                 b.iter(|| {
                     let _popped = black_box(tree.pop())
                         .expect("I thought this iterator would yield values for forever");
@@ -80,6 +80,3 @@ pub fn identical_inputs(c: &mut Criterion) {
     }
     group.finish();
 }
-
-criterion_group!(merge, identical_inputs);
-criterion_main!(merge);
