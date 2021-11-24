@@ -1,6 +1,6 @@
 use bytes::Bytes;
-use stream_merge::tournament_tree;
 use std::io::{BufWriter, Write};
+use stream_merge::tournament_tree;
 
 use hex_literal::hex;
 

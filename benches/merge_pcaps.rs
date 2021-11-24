@@ -105,10 +105,11 @@ pub fn stream_and_decompress_throughput(c: &mut Criterion) {
             .tempdir()
             .unwrap();
 
-        const GB: usize = 1024 * 1024 * 1024 * 1024;
+        const GB: usize = 1024 * 1024 * 1024;
+        const TOTAL_CORPUS_SIZE_GB: usize = 2;
         let corpus = create_corpus(
-            1 * GB, // 1 Gigabyte
-            60,
+            TOTAL_CORPUS_SIZE_GB * GB,
+            20,
             3,
             *compression_format,
             StorageLocation::Local {
@@ -117,21 +118,37 @@ pub fn stream_and_decompress_throughput(c: &mut Criterion) {
         );
 
         // TODO: loop over different num_files and corpus size options
-        let mut group = c.benchmark_group("Merge 60-file 1GB Corpus"); /* consider passing the corpus size parameters in a bench_with_input call */
-        group.throughput(criterion::Throughput::Bytes(GB as u64));
+        let mut group = c.benchmark_group(std::format!(
+            "Merge 60-file {}GB Corpus",
+            TOTAL_CORPUS_SIZE_GB
+        ));
+        group.throughput(criterion::Throughput::Bytes(
+            (TOTAL_CORPUS_SIZE_GB * GB) as u64,
+        ));
+        group.sample_size(10);
         // group.sampling_mode(criterion::SamplingMode::Flat); /* use flat sampling mode due to long test runtime */
-        for binary in &["merge_pcaps"] {
+        for binary in &["merge_pcaps", "mergecap"] {
             group.bench_with_input(
                 criterion::BenchmarkId::from_parameter(binary),
                 binary,
                 |b, binary| {
-                    b.iter(|| {
-                        let mut merge_command = std::process::Command::cargo_bin(binary).unwrap();
-                        merge_command.stdout(std::process::Stdio::null());
-                        merge_command.stderr(std::process::Stdio::inherit());
-                        merge_command.args(corpus.iter());
-
-                        merge_command.assert().success();
+                    b.iter(|| match *binary {
+                        "merge_pcaps" => {
+                            let mut cmd = std::process::Command::cargo_bin(binary).unwrap();
+                            cmd.stdout(std::process::Stdio::null());
+                            cmd.stderr(std::process::Stdio::inherit());
+                            cmd.args(corpus.iter());
+                            cmd.assert().success();
+                        }
+                        "mergecap" => {
+                            let mut cmd = std::process::Command::new("mergecap");
+                            cmd.stdout(std::process::Stdio::null());
+                            cmd.stderr(std::process::Stdio::inherit());
+                            cmd.arg("-F").arg("nseclibpcap").arg("-w").arg("-");
+                            cmd.args(corpus.iter());
+                            cmd.assert().success();
+                        }
+                        _ => {}
                     });
                 },
             );

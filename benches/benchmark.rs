@@ -7,4 +7,4 @@ criterion_group!(
     stream_decompress_and_merge_pcaps,
     merge_pcaps::stream_and_decompress_throughput
 );
-criterion_main!(merge, stream_decompress_and_merge_pcaps);
+criterion_main!(/*merge,*/ stream_decompress_and_merge_pcaps);
