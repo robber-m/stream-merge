@@ -1,5 +1,6 @@
 use assert_cmd::prelude::*;
 use criterion::Criterion;
+use fake::Fake;
 use std::io::prelude::*;
 
 #[derive(Copy, Clone)]
@@ -36,14 +37,18 @@ pub struct PacketHeader {
     pub len: u32,
 }
 
-fn write_fake_packet<W: std::io::Write>(mut file: W) -> usize {
+fn write_fake_packet<W: std::io::Write>(
+    mut file: W,
+    seconds_since_epoch: u32,
+    nanoseconds_since_second: u32,
+) -> usize {
     // all bytes are 7 for now. TODO: randomize these bytes for more realistic compresssion
     let packet_bytes = [7u8; 153];
 
     // TODO: somehow use the property testing or mocking framework for choosing the "time step" between packets that is >= 0
     let header = PacketHeader {
-        seconds: 11 as u32,
-        nanoseconds: 99 as u32,
+        seconds: seconds_since_epoch,
+        nanoseconds: nanoseconds_since_second,
         caplen: packet_bytes.len() as u32,
         len: packet_bytes.len() as u32,
     };
@@ -59,6 +64,7 @@ impl Corpus {
     fn new(config: &CorpusConfiguration) -> Corpus {
         const GB: usize = 1024 * 1024 * 1024;
         let mut paths = Vec::with_capacity(config.n_files as usize);
+        let mut current_time: (u32, u32) = (1637796620, 7);
         for i in 1..=config.n_files {
             let (mut file, path) = match config.storage_location {
                 StorageLocation::Local { directory } => {
@@ -79,7 +85,13 @@ impl Corpus {
 
             let mut n_bytes_written = PCAP_HDR_NSEC.len();
             while n_bytes_written < ((config.total_size_gb * GB) / config.n_files as usize) {
-                n_bytes_written += write_fake_packet(&mut file); /* TODO: pick a random step for the packet timestamp? */
+                let to_advance: (u32, u32) = ((0..1).fake(), (0..1000000000).fake());
+                current_time = (
+                    current_time.0 + to_advance.0,
+                    (current_time.1 + to_advance.1) % 1000000000,
+                );
+                n_bytes_written += write_fake_packet(&mut file, current_time.0, current_time.1);
+                /* TODO: pick a random step for the packet timestamp? */
             }
 
             drop(file); // flush

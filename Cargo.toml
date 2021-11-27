@@ -43,6 +43,8 @@ futures-test = "0.3.17"
 assert_cmd = "2"
 predicates = "2"
 tempfile = "3"
+fake = "<=2.4.1"
+rand = "0.8"
 
 criterion = "0.3"
 itertools = "0.9.0"
